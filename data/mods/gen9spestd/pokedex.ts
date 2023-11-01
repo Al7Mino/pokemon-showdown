@@ -1,6 +1,6 @@
 export const Pokedex: {[k: string]: ModdedSpeciesData} = {
-	venusaur: {
+	abomasnow: {
 		inherit: true,
-		baseStats: {hp: 100, atk: 82, def: 83, spa: 100, spd: 100, spe: 80},
+		baseStats: {hp: 100, atk: 92, def: 75, spa: 92, spd: 85, spe: 60},
 	},
 };
