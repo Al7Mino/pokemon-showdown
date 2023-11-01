@@ -6,8 +6,8 @@ export const Formats: FormatList = [
 		section: "Custom Format",
 	},
 	{
-		name: "[Gen ?] Special format",
-		mod: 'custom',
+		name: "[Gen 9] Special format",
+		mod: 'gen9spestd',
 		ruleset: ['Standard'],
 		banlist: ['Uber', 'AG', 'Arena Trap', 'Moody', 'Sand Veil', 'Shadow Tag', 'Snow Cloak', 'King\'s Rock', 'Baton Pass', 'Last Respects', 'Shed Tail'],
 	},
