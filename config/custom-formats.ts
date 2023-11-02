@@ -12,6 +12,18 @@ export const Formats: FormatList = [
 		banlist: ['Uber', 'AG', 'Arena Trap', 'Moody', 'Sand Veil', 'Shadow Tag', 'Snow Cloak', 'King\'s Rock', 'Baton Pass', 'Last Respects', 'Shed Tail'],
 	},
 	{
+		name: "[Gen 8] Ubers",
+		threads: [
+			`&bullet; <a href="https://www.smogon.com/forums/threads/3676539/">SS Ubers Metagame Discussion</a>`,
+			`&bullet; <a href="https://www.smogon.com/forums/threads/3675564/">SS Ubers Sample Teams</a>`,
+			`&bullet; <a href="https://www.smogon.com/forums/threads/3675194/">SS Ubers Viability Rankings</a>`,
+		],
+
+		mod: 'gen8',
+		ruleset: ['Standard', 'Dynamax Clause'],
+		banlist: ['AG', 'Shadow Tag', 'Baton Pass'],
+	},
+	{
 		name: "[Gen 9] Partners in Crime",
 		desc: `Doubles-based metagame where both active ally Pok&eacute;mon share abilities and moves.`,
 		threads: [
