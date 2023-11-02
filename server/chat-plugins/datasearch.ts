@@ -355,7 +355,7 @@ export const commands: Chat.ChatCommands = {
 			`- <code>zmove</code>, <code>max</code>, or <code>gmax</code> as parameters will search for Z-Moves, Max Moves, and G-Max Moves respectively.<br/>` +
 			`- Move targets must be preceded with <code>targets </code>; e.g. <code>targets user</code> searches for moves that target the user.<br/>` +
 			`- Valid move targets are: one ally, user or ally, one adjacent opponent, all Pokemon, all adjacent Pokemon, all adjacent opponents, user and allies, user's side, user's team, any Pokemon, opponent's side, one adjacent Pokemon, random adjacent Pokemon, scripted, and user.<br/>` +
-			`- Valid flags are: allyanim, bypasssub (bypasses Substitute), bite, bullet, charge, contact, dance, defrost, distance (can target any Pokemon in Triples), failcopycat, failencore, failinstruct, failmefirst, failmimic, futuremove, gravity, heal, highcrit, instruct, mefirst, mimic, mirror (reflected by Mirror Move), mustpressure, multihit, noassist, nonsky, noparentalbond, nosleeptalk, ohko, pivot, pledgecombo, powder, priority, protect, pulse, punch, recharge, recovery, reflectable, secondary, slicing, snatch, sound, and wind.<br/>` +
+			`- Valid flags are: allyanim, bypasssub (bypasses Substitute), bite, bullet, cantusetwice, charge, contact, dance, defrost, distance (can target any Pokemon in Triples), failcopycat, failencore, failinstruct, failmefirst, failmimic, futuremove, gravity, heal, highcrit, instruct, mefirst, mimic, mirror (reflected by Mirror Move), mustpressure, multihit, noassist, nonsky, noparentalbond, nosleeptalk, ohko, pivot, pledgecombo, powder, priority, protect, pulse, punch, recharge, recovery, reflectable, secondary, slicing, snatch, sound, and wind.<br/>` +
 			`- <code>protection</code> as a parameter will search protection moves like Protect, Detect, etc.<br/>` +
 			`- A search that includes <code>!protect</code> will show all moves that bypass protection.<br/>` +
 			`</details><br/>` +
@@ -624,11 +624,16 @@ function runDexsearch(target: string, cmd: string, canAll: boolean, message: str
 		uubl: 'UUBL', uu: 'UU',
 		rubl: 'RUBL', ru: 'RU',
 		nubl: 'NUBL', nu: 'NU',
-		publ: 'PUBL', pu: 'PU', zu: '(PU)',
+		publ: 'PUBL', pu: 'PU',
+		zubl: 'ZUBL', zu: 'ZU',
 		nfe: 'NFE',
 		lc: 'LC',
 		cap: 'CAP', caplc: 'CAP LC', capnfe: 'CAP NFE',
 	});
+	if (mod.gen === 3) {
+		allTiers.zu = 'ZU';
+		allTiers.zubl = 'ZUBL';
+	}
 	const allDoublesTiers: {[k: string]: TierTypes.Singles | TierTypes.Other} = Object.assign(Object.create(null), {
 		doublesubers: 'DUber', doublesuber: 'DUber', duber: 'DUber', dubers: 'DUber',
 		doublesou: 'DOU', dou: 'DOU',
@@ -1123,7 +1128,8 @@ function runDexsearch(target: string, cmd: string, canAll: boolean, message: str
 			if (alts.tiers && Object.keys(alts.tiers).length) {
 				let tier = dex[mon].tier;
 				if (nationalSearch) tier = dex[mon].natDexTier;
-				if (tier.startsWith('(') && tier !== '(PU)') tier = tier.slice(1, -1) as TierTypes.Singles;
+				if (tier === '(PU)') tier = 'ZU';
+				if (tier.startsWith('(')) tier = tier.slice(1, -1) as TierTypes.Singles;
 				// if (tier === 'New') tier = 'OU';
 				if (alts.tiers[tier]) continue;
 				if (Object.values(alts.tiers).includes(false) && alts.tiers[tier] !== false) continue;
@@ -1303,11 +1309,16 @@ function runDexsearch(target: string, cmd: string, canAll: boolean, message: str
 	let results: string[] = [];
 	for (const mon of Object.keys(dex).sort()) {
 		if (singleTypeSearch !== null && (dex[mon].types.length === 1) !== singleTypeSearch) continue;
-		const isRegionalForm = ["Alola", "Galar", "Hisui", "Paldea"].includes(dex[mon].forme) &&
-			dex[mon].name !== "Pikachu-Alola";
+		const isRegionalForm = (["Alola", "Galar", "Hisui"].includes(dex[mon].forme) || dex[mon].forme.startsWith("Paldea")) &&
+			dex[mon].baseSpecies !== "Pikachu";
+		const maskForm = dex[mon].baseSpecies === "Ogerpon" && !dex[mon].forme.endsWith("Tera");
 		const allowGmax = (gmaxSearch || tierSearch);
-		if (!isRegionalForm && dex[mon].baseSpecies && results.includes(dex[mon].baseSpecies) &&
+		if (!isRegionalForm && !maskForm && dex[mon].baseSpecies && results.includes(dex[mon].baseSpecies) &&
 			getSortValue(mon) === getSortValue(dex[mon].baseSpecies)) continue;
+		const teraFormeChangesFrom = dex[mon].forme.endsWith("Tera") ? !Array.isArray(dex[mon].battleOnly) ?
+			dex[mon].battleOnly as string : null : null;
+		if (teraFormeChangesFrom && results.includes(teraFormeChangesFrom) &&
+			getSortValue(mon) === getSortValue(teraFormeChangesFrom)) continue;
 		if (dex[mon].isNonstandard === 'Gigantamax' && !allowGmax) continue;
 		results.push(dex[mon].name);
 	}
@@ -1373,9 +1384,9 @@ function runMovesearch(target: string, cmd: string, canAll: boolean, message: st
 	const allContestTypes = ['beautiful', 'clever', 'cool', 'cute', 'tough'];
 	const allProperties = ['basePower', 'accuracy', 'priority', 'pp'];
 	const allFlags = [
-		'allyanim', 'bypasssub', 'bite', 'bullet', 'charge', 'contact', 'dance', 'defrost', 'distance', 'failcopycat', 'failencore', 'failinstruct',
-		'failmefirst', 'failmimic', 'futuremove', 'gravity', 'heal', 'mirror', 'mustpressure', 'noassist', 'nonsky', 'noparentalbond', 'nosleeptalk',
-		'pledgecombo', 'powder', 'protect', 'pulse', 'punch', 'recharge', 'reflectable', 'slicing', 'snatch', 'sound', 'wind',
+		'allyanim', 'bypasssub', 'bite', 'bullet', 'cantusetwice', 'charge', 'contact', 'dance', 'defrost', 'distance', 'failcopycat', 'failencore',
+		'failinstruct', 'failmefirst', 'failmimic', 'futuremove', 'gravity', 'heal', 'mirror', 'mustpressure', 'noassist', 'nonsky', 'noparentalbond',
+		'nosleeptalk', 'pledgecombo', 'powder', 'protect', 'pulse', 'punch', 'recharge', 'reflectable', 'slicing', 'snatch', 'sound', 'wind',
 
 		// Not flags directly from move data, but still useful to sort by
 		'highcrit', 'multihit', 'ohko', 'protection', 'secondary',
